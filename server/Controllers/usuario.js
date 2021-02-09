@@ -1,4 +1,7 @@
 const pool = require('../config/data');
+const bcrypt = require('bcrypt');
+
+
 
 //CREAR USUARIOS
 function CrearUsuario(usuario, res) {
@@ -6,9 +9,11 @@ function CrearUsuario(usuario, res) {
     // estatus = parseInt(usuario.estatus);
     // legajo = parseInt(usuario.legajo);
 
+    const Contrasenahash = bcrypt.hashSync(usuario.password, 10);
+
     const INSERT = `INSERT INTO usuario (id, legajo, nombre, apellido, email, password, role, estatus) VALUES 
     (NULL, "${usuario.legajo}", "${usuario.nombre}", "${usuario.apellido}", "${usuario.email}",
-    "${usuario.password}", "${usuario.role}", "${usuario.estatus}");`;
+    "${Contrasenahash}", "${usuario.role}", "${usuario.estatus}");`;
 
     pool.query(INSERT, (err, result) => {
 
@@ -33,7 +38,7 @@ function CrearUsuario(usuario, res) {
 //CASO EL LEGAJO SEA PASADO POR PARAMETRO, SI SELECCIONA UNO SÓLO. 
 function SelectUsuario(usuario, res) {
 
-    let SELECT = `SELECT * FROM usuario WHERE legajo = ${usuario.legajo}`;
+    let SELECT = `SELECT legajo, nombre, apellido, email FROM usuario WHERE legajo = ${usuario.legajo}`;
 
     if (usuario.legajo === '' || usuario.legajo == undefined) {
         SELECT = "SELECT * FROM usuario";
@@ -76,9 +81,7 @@ function SelectUsuario(usuario, res) {
                 message: 'USUARIO(S) DE BASE DE DATOS',
                 result
             });
-
         }
-
     });
 }
 
@@ -86,13 +89,10 @@ function SelectUsuario(usuario, res) {
 //Actualizar usuario
 function ActualizarUsuario(usuario, res) {
 
-    const UPDATE = `UPDATE usuario SET legajo = ${usuario.legajo},
+    const UPDATE = `UPDATE usuario SET 
         nombre = "${usuario.nombre}",
         apellido = "${usuario.apellido}",
-        email = "${usuario.email}",
-        password = "${usuario.password}",
-        role = "${usuario.role}",
-        estatus = "${usuario.estatus}" WHERE legajo = ${usuario.legajo}`;
+        email = "${usuario.email}" WHERE legajo = ${usuario.legajo}`;
 
     pool.query(UPDATE, (err, result) => {
 

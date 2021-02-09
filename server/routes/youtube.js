@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
-const ServiceSolicitud = require('../Controlles/solicitudVideo');
+const ServiceSolicitud = require('../Controllers/solicitudVideo');
 const pool = require('../config/data');
 
 // parse application/x-www-form-urlencoded

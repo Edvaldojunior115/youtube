@@ -1,7 +1,9 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+
 const app = express();
-const ServiceUsuario = require('../Controlles/usuario');
+
+const ServiceUsuario = require('../Controllers/usuario');
 const pool = require('../config/data');
 
 // parse application/x-www-form-urlencoded
@@ -40,36 +42,48 @@ app.post('/usuario', (req, res) => {
         apellido: body.apellido,
         email: body.email,
         password: body.password,
-        estatus: body.estatus,
-        role: body.role
+        estatus: '1',
+        role: 'ROLE_USER'
     });
 
+    if (dataUser.legajo == '' || dataUser.legajo == undefined || dataUser.password == '' || dataUser.password == undefined) {
 
-    switch (operacion) {
+        return res.status(406).send({
+            ok: false,
+            message: 'LOS CAMPOS LEGAJO Y CONTRASENA SON OBLIGATÓRIOS.'
 
-        case 'CREATE':
-            ServiceUsuario.CrearUsuario(dataUser, res);
-            break;
+        });
 
-        case 'READ':
-            ServiceUsuario.SelectUsuario(dataUser, res);
-            break;
+    } else {
 
-        case 'UPDATE':
-            ServiceUsuario.ActualizarUsuario(dataUser, res);
-            break;
+        switch (operacion) {
 
-        case 'DELETE':
-            ServiceUsuario.EliminarUsuario(dataUser, res);
-            break;
+            case 'CREATE':
+                ServiceUsuario.CrearUsuario(dataUser, res);
+                break;
 
-        default:
-            res.status(400).json({
-                ok: false,
-                message: 'DEBES PROVEER UNA OPERACIÓN A REALIZAR ---> INSERT, UPDATE, READ, DELETE'
-            });
-            break;
+            case 'READ':
+                ServiceUsuario.SelectUsuario(dataUser, res);
+                break;
+
+            case 'UPDATE':
+                ServiceUsuario.ActualizarUsuario(dataUser, res);
+                break;
+
+            case 'DELETE':
+                ServiceUsuario.EliminarUsuario(dataUser, res);
+                break;
+
+            default:
+                res.status(400).json({
+                    ok: false,
+                    message: 'DEBES PROVEER UNA OPERACIÓN A REALIZAR ---> INSERT, UPDATE, READ, DELETE'
+                });
+                break;
+        }
+
     }
+
 });
 
 module.exports = app;
