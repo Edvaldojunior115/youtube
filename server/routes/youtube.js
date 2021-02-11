@@ -1,14 +1,14 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
-const ServiceSolicitud = require('../Controllers/solicitudVideo');
+const ControllerSolicitud = require('../Controllers/solicitudVideo');
 const pool = require('../config/data');
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
 
 //Seleccionamos todos los usuarios de nuestra Base de Datos
-app.get('/youtube', (req, res) => {
+app.get('/youtube', (res) => {
 
     const SelectSolicitud = "SELECT * FROM solicitudvideo";
 
@@ -17,14 +17,18 @@ app.get('/youtube', (req, res) => {
 
         if (result.length == 0) {
 
-            return res.json({
+            return res.status(404).send({
                 ok: true,
                 message: 'OPS, NO HAY REGISTROS EN LA BASE DE DATOS'
 
             });
         }
 
-        res.send(result);
+        res.send({
+            ok: true,
+            message: 'SOLICITUDES DE BASE DE DATOS: ',
+            result
+        });
     });
 });
 
@@ -44,19 +48,19 @@ app.post('/youtube', (req, res) => {
     switch (operacion) {
 
         case 'CREATE':
-            ServiceSolicitud.CrearSolicitud(data, res);
+            ControllerSolicitud.CrearSolicitud(data, res);
             break;
 
         case 'READ':
-            ServiceSolicitud.SelectSolicitudUsuario(data, res);
+            ControllerSolicitud.SelectSolicitudUsuario(data, res);
             break;
 
         case 'UPDATE':
-            ServiceSolicitud.ActualizarSolicitud(data, res);
+            ControllerSolicitud.ActualizarSolicitud(data, res);
             break;
 
         case 'DELETE':
-            ServiceSolicitud.EliminarSolicitud(data, res);
+            ControllerSolicitud.EliminarSolicitud(data, res);
             break;
 
         default:

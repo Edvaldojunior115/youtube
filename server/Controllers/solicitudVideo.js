@@ -1,21 +1,35 @@
 const pool = require('../config/data');
 
-
 //CREAR SOLICITUD DE VIDEO
 function CrearSolicitud(data, res) {
 
+
+    if (data.idusuario == '' || data.idusuario == undefined || data.url == '' || data.url == undefined) {
+
+        return res.status(404).send({
+            ok: false,
+            message: 'POR FAVOR, LOS CAMPOS url E idusuario SON OBLIGATÓRIO.'
+        });
+    }
+
     const INSERT = `INSERT INTO solicitudvideo (id, url, titulo, minutos, idusuario) VALUES
-    (NULL,
-    "${data.url}", "${data.titulo}",
-    "${data.minutos}", "${data.idusuario}");`;
+    (NULL, "${data.url}", "${data.titulo}", "${data.minutos}", "${data.idusuario}");`;
 
     pool.query(INSERT, (err, result) => {
 
         if (err) {
-            res.status(400).json({
+            return res.status(400).json({
                 ok: false,
                 message: 'ERROR AL INTENTAR INSERTA LOS DATOS EN LA BASE DE DATOS: ',
                 err
+            });
+        }
+
+        if (result.length == 0) {
+            return res.status(404).send({
+                ok: false,
+                message: 'LA SOLICITUD NO HA SIDO CREADA.'
+
             });
         }
 
@@ -32,28 +46,37 @@ function CrearSolicitud(data, res) {
 //CASO EL LEGAJO SEA PASADO POR PARAMETRO, SI SELECCIONA UNO SÓLO. 
 function SelectSolicitudUsuario(data, res) {
 
-    let SELECT = `SELECT * FROM solicitudvideo WHERE idusuario = ${data.idusuario};`;
-
-    if (data.idusuario === '' || data.idusuario == undefined) {
-        SELECT = "SELECT * FROM solicitudvideo";
+    if (data.idusuario == '' || data.idusuario == undefined) {
+        return res.status(406).send({
+            ok: false,
+            message: 'ES NECESARIO ESPECIFICAR EL ID DEL USUARIO QUE HA GENERADO LA SOLICITUD.'
+        });
     }
+
+    let SELECT = `SELECT * FROM solicitudvideo WHERE idusuario = ${data.idusuario};`;
 
     pool.query(SELECT, (err, result) => {
 
-        if (err) { throw err }
+        if (err) {
 
-        if (result.length == 0) {
-            return res.status(400).json({
+            return res.status().send({
                 ok: false,
-                idSolicitud: data.idusuario,
-                message: 'LA SOLICITUD CON ESTE ID NO EXISTE EN LA BASE DE DATOS.',
-
+                message: 'ERROR AL REALIZAR LA CONSULTA EN LA BASE DE DATOS.',
+                err
             });
         }
 
-        res.json({
+        if (result.length == 0) {
+            return res.status(404).json({
+                ok: false,
+                idSolicitud: data.idusuario,
+                message: 'LA SOLICITUD CON ESTE ID NO EXISTE EN LA BASE DE DATOS.',
+            });
+        }
+
+        res.send({
             ok: true,
-            message: 'SOLICITUD(ES) DE BASE DE DATOS',
+            message: 'SOLICITUD(ES) ENCONTRADA(S) PARA EL ID DE USUARIO ESPECIFICADO: ',
             result
         });
     });
@@ -62,6 +85,14 @@ function SelectSolicitudUsuario(data, res) {
 
 //Actualizar solicitud de video
 function ActualizarSolicitud(data, res) {
+
+    if (data.id == '' || data.id == undefined) {
+
+        return res.status(404).send({
+            ok: true,
+            message: 'POR FAVOR, ESPECIFIQUE EL ID DE LA SOLICITUD A ACTUALIZAR.'
+        });
+    }
 
     const UPDATE = `UPDATE solicitudvideo SET
         url = "${data.url}",
@@ -75,6 +106,14 @@ function ActualizarSolicitud(data, res) {
                 ok: true,
                 message: 'NO FUE POSIBLE ACTUALIZAR LA SOLICITUD',
                 err
+            });
+        }
+
+        if (result.length == 0) {
+            return res.status(404).json({
+                ok: false,
+                idSolicitud: data.idusuario,
+                message: 'SOLICITUD NO HA SIDO ACTUALIZADA EN LA BASE DE DATOS.',
             });
         }
 
@@ -94,6 +133,14 @@ function ActualizarSolicitud(data, res) {
  */
 function EliminarSolicitud(data, res) {
 
+    if (data.id == '' || data.id == undefined) {
+
+        return res.status(404).send({
+            ok: true,
+            message: 'POR FAVOR, ESPECIFIQUE EL ID DE LA SOLICITUD A ELIMINAR.'
+        });
+    }
+
     const DELETE = `DELETE FROM solicitudvideo  WHERE id = ${data.id}`;
 
     pool.query(DELETE, (err, result) => {
@@ -104,6 +151,14 @@ function EliminarSolicitud(data, res) {
                 ok: false,
                 message: 'ERRO AL INTENTAR ELIMINAR SOLICITUD',
                 err
+            });
+        }
+
+        if (result.length == 0) {
+            res.status(404).send({
+                ok: false,
+                message: 'LA SOLICITUD NO HA SIDO ELIMINADA EN LA BASE DE DATOS.'
+
             });
         }
 
