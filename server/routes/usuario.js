@@ -1,18 +1,19 @@
 const express = require('express');
+const { check } = require('express-validator');
 // const bodyParser = require('body-parser');
 
 const app = express();
 
 const ControllerUsuario = require('../Controllers/usuario');
-const pool = require('../config/data');
+const pool = require('../database/data');
 
 // parse application/x-www-form-urlencoded
 // app.use(bodyParser.urlencoded({ extended: false }));
 
 //Seleccionamos todos los usuarios de nuestra Base de Datos
-app.get('/usuarios', (res) => {
+app.get('/usuarios', (req, res) => {
 
-    const SelectUsuarios = "SELECT * FROM usuario WHERE estatus = 1";
+    const SelectUsuarios = "SELECT legajo, nombre, apellido, email, role, estatus FROM usuario WHERE estatus = 1";
 
     pool.query(SelectUsuarios, (err, result) => {
 

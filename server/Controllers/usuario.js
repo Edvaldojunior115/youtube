@@ -1,13 +1,14 @@
-const pool = require('../config/data');
+const pool = require('../database/data');
 const bcrypt = require('bcrypt');
 
 //CREAR USUARIOS
 function CrearUsuario(req, res) {
     let body = req.body;
+    // const legajo = req.body.legajo;
 
-    dataUser({
+    let dataUser = ({
         role: 'ROLE_USER',
-        estatus: '1'
+        estatus: 1
     });
 
     if (body.legajo == '' || body.legajo == undefined || body.password == '' || body.password == undefined) {
@@ -20,8 +21,10 @@ function CrearUsuario(req, res) {
     }
 
     //REALIZAMOS LA INCRIPTACIÓN DE LA CONTRASEÑA
-    const ContrasenaHash = bcrypt.hashSync(body.password, 10);
+    const salt = bcrypt.genSaltSync();
+    ContrasenaHash = bcrypt.hashSync(body.password, salt);
 
+    //Preparamos la query
     const INSERT = `INSERT INTO usuario (id, legajo, nombre, apellido, email, password, role, estatus) VALUES 
     (NULL, "${body.legajo}", "${body.nombre}", "${body.apellido}", "${body.email}",
     "${ContrasenaHash}", "${dataUser.role}", "${dataUser.estatus}");`;
@@ -29,7 +32,7 @@ function CrearUsuario(req, res) {
     pool.query(INSERT, (err, result) => {
 
         if (err) {
-            res.status(400).json({
+            return res.status(400).json({
                 ok: false,
                 message: 'ERROR AL INSERTAR USUARIO EN BASE DE DATOS ',
                 err
@@ -37,7 +40,7 @@ function CrearUsuario(req, res) {
         }
 
         if (result.length == 0) {
-            res.status(404).send({
+            return res.status(404).send({
                 ok: false,
                 message: 'EL USUARIO NO HA SICO CREADO.'
             });
@@ -68,7 +71,7 @@ function SelectUsuario(req, res) {
 
     }
 
-    let SELECT = `SELECT legajo, nombre, apellido, email FROM usuario WHERE legajo = ${legajo} AND estatus = 1`;
+    const SELECT = `SELECT legajo, nombre, apellido, email FROM usuario WHERE legajo = ${legajo} AND estatus = 1`;
 
     pool.query(SELECT, (err, result) => {
 

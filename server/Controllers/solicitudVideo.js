@@ -1,4 +1,4 @@
-const pool = require('../config/data');
+const pool = require('../database/data');
 
 //CREAR SOLICITUD DE VIDEO
 function CrearSolicitud(data, res) {
